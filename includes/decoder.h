@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:02:15 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/01 02:17:24 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/01 02:42:55 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <stdbool.h>
 # include <libft/libft.h>
+
 
 bool	decode_png(char *file);
 

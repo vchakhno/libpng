@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:04:30 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/01 02:21:04 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/01 03:14:11 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,27 @@ bool	check_signature(int fd)
 bool	decode_png(char *file)
 {
 	int		fd;
+	char	chunk_type[4];
 
 	fd = open(file, O_RDONLY);
+	if (fd == -1)
+		return (false);
 	if (!check_signature(fd))
+	{
+		close(fd);
+		return (false);
+	}
+	if (read(fd, (t_u8 [4]){}, 4) != 4)
+	{
+		close(fd);
+		return (false);
+	}
+	if (read(fd, chunk_type, 4) != 4)
+	{
+		close(fd);
+		return (false);
+	}
+	if (!ft_mem_equal(chunk_type, "IHDR", 4))
 	{
 		close(fd);
 		return (false);
