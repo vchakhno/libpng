@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:05:15 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/01 03:25:28 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/01 03:44:02 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,14 @@ Test(decoder, invalid_start_chunk)
 	cr_assert(!decode_png("ressources/invalid_start_chunk.png", &image));
 }
 
-Test(decoder, dimensions)
+Test(decoder, invalid_dimensions)
+{
+	t_image	image;
+
+	cr_assert(!decode_png("ressources/0x1.png", &image));
+}
+
+Test(decoder, valid_dimensions)
 {
 	t_image	image;
 

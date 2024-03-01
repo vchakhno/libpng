@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:04:30 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/01 03:34:09 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/01 03:43:42 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,9 @@ bool	decode_ihdr_header(int fd, t_u32 *width, t_u32 *height)
 		return (false);
 	if (read(fd, chunk_type, 4) != 4 || !ft_mem_equal(chunk_type, "IHDR", 4))
 		return (false);
-	if (!decode_u31(fd, width) || !decode_u31(fd, height))
+	if (!decode_u31(fd, width) || !*width)
+		return (false);
+	if (!decode_u31(fd, height) || !*height)
 		return (false);
 	return (true);
 }
