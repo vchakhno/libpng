@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:04:30 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/15 04:10:42 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/15 09:36:52 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,11 +68,26 @@ bool	skip_bytes(int fd, t_u32 nb_bytes)
 
 // Decodes only the type and the length.
 
-bool	decode_chunk_header(int fd, t_u32 *chunk_len, t_u8 chunk_type[4])
+bool	decode_chunk_header(int fd, t_u32 *chunk_len, t_u8 chunk_type[4], t_u32 *crc)
 {
 	if (!decode_u31(fd, chunk_len))
 		return (false);
-	if (read(fd, chunk_type, 4) != 4)
+	*crc = 0xFFFFFFFF;
+	if (!read_exact_with_crc(fd, chunk_type, 4, crc))
+		return (false);
+	return (true);
+}
+
+bool	decode_crc(int fd, t_u32 crc)
+{
+	t_u8	crc_bytes[4];
+	t_u32	encoded_crc;
+
+	if (read(fd, crc_bytes, 4) != 4)
+		return (false);
+	encoded_crc = crc_bytes[0] << 24 | crc_bytes[1] << 16
+				| crc_bytes[2] << 8 | crc_bytes[3];
+	if ((crc ^ 0xFFFFFFFF) != encoded_crc)
 		return (false);
 	return (true);
 }
@@ -92,16 +107,19 @@ bool	decode_ihdr_header(int fd, t_u32 *width, t_u32 *height)
 {
 	t_u32	chunk_len;
 	t_u8	chunk_type[4];
+	t_u32	crc;
 
-	if (!decode_chunk_header(fd, &chunk_len, chunk_type))
+	if (!decode_chunk_header(fd, &chunk_len, chunk_type, &crc))
 		return (false);
 	if (chunk_len != 13 || !ft_mem_equal(chunk_type, "IHDR", 4))
 		return (false);
-	if (!decode_u31(fd, width) || !*width)
+	if (!decode_u31_with_crc(fd, width, &crc) || !*width)
 		return (false);
-	if (!decode_u31(fd, height) || !*height)
+	if (!decode_u31_with_crc(fd, height, &crc) || !*height)
 		return (false);
-	if (!skip_bytes(fd, 9))
+	if (!skip_bytes_with_crc(fd, 5, &crc))
+		return (false);
+	if (!decode_crc(fd, crc))
 		return (false);
 	return (true);
 }
@@ -110,6 +128,7 @@ bool	decode_png_stream(int fd, t_image *image)
 {
 	t_u32	chunk_len;
 	t_u8	chunk_type[4];
+	t_u32	crc;
 
 	if (!check_signature(fd))
 		return (false);
@@ -117,11 +136,13 @@ bool	decode_png_stream(int fd, t_image *image)
 		return (false);
 	while (true)
 	{
-		if (!decode_chunk_header(fd, &chunk_len, chunk_type))
+		if (!decode_chunk_header(fd, &chunk_len, chunk_type, &crc))
 			return (false);
 		if (ft_mem_equal(chunk_type, "IEND", 4))
-			return (chunk_len == 0 && skip_bytes(fd, 4));
-		if (!skip_bytes(fd, chunk_len + 4))
+			return (chunk_len == 0 && decode_crc(fd, crc));
+		if (!skip_bytes_with_crc(fd, chunk_len, &crc))
+			return (false);
+		if (!decode_crc(fd, crc))
 			return (false);
 	}
 	return (true);

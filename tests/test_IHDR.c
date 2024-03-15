@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:05:15 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/15 03:20:46 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/15 09:24:40 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,13 @@ Test(IHDR, height_too_high)
 	t_image	image;
 
 	cr_assert(!decode_png("ressources/IHDR/1920x2^31.png", &image));
+}
+
+Test(IHDR, wrong_crc)
+{
+	t_image	image;
+
+	cr_assert(!decode_png("ressources/IHDR/wrong_crc.png", &image));
 }
 
 Test(IHDR, valid_dimensions)

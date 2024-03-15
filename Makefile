@@ -1,4 +1,5 @@
-SRCS			:= decoder.c
+SRCS			:=	decoder.c \
+					crc32.c
 SRCS			:= $(addprefix sources/,$(SRCS))
 
 TESTS			:=	test_signature.c \
