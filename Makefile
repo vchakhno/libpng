@@ -1,7 +1,11 @@
-
-SRCS_DIR		:= sources
 SRCS			:= decoder.c
-SRCS			:= $(addsuffix $(SRCS_DIR)/,$(SRCS))
+SRCS			:= $(addprefix sources/,$(SRCS))
+
+TESTS			:=	test_signature.c \
+					test_path.c \
+					test_IHDR.c \
+					test_IEND.c
+TESTS			:= $(addprefix tests/,$(TESTS))
 
 CRITERION_PATH	:= /mnt/nfs/homes/vchakhno/Documents/Criterion
 CRITERION_BIN	:= $(CRITERION_PATH)/build/src/
@@ -17,7 +21,7 @@ LDFLAGS			:=	-L $(CRITERION_BIN) -lcriterion -Wl,-rpath,$(CRITERION_BIN) \
 					-L $(LIBFT_PATH) -lft
 
 
-test: sources/decoder.c tests/test_decoder.c
+test: $(SRCS) $(TESTS)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 
 .PHONY: test

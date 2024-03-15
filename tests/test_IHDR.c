@@ -1,65 +1,65 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_decoder.c                                     :+:      :+:    :+:   */
+/*   test_IHDR.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:05:15 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/01 03:57:49 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/15 03:20:46 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "decoder.h"
 #include <criterion/criterion.h>
 
-Test(decoder, invalid_path)
+Test(IHDR, wrong_chunk_size)
 {
 	t_image	image;
 
-	cr_assert(!decode_png("ressources/doesntexist.png", &image));
+	cr_assert(!decode_png("ressources/IHDR/wrong_chunk_size.png", &image));
 }
 
-Test(decoder, invalid_signature)
+Test(IHDR, wrong_chunk_type)
 {
 	t_image	image;
 
-	cr_assert(!decode_png("ressources/panoramic.jpg", &image));
+	cr_assert(!decode_png("ressources/IHDR/wrong_chunk_type.png", &image));
 }
 
-Test(decoder, invalid_start_chunk)
+Test(IHDR, zero_width)
 {
 	t_image	image;
 
-	cr_assert(!decode_png("ressources/invalid_start_chunk.png", &image));
+	cr_assert(!decode_png("ressources/IHDR/0x1080.png", &image));
 }
 
-Test(decoder, invalid_dimensions)
+Test(IHDR, zero_height)
 {
 	t_image	image;
 
-	cr_assert(!decode_png("ressources/0x1.png", &image));
+	cr_assert(!decode_png("ressources/IHDR/1920x0.png", &image));
 }
 
-Test(decoder, valid_dimensions)
+Test(IHDR, width_too_high)
 {
 	t_image	image;
 
-	cr_assert(decode_png("ressources/panoramic.png", &image));
+	cr_assert(!decode_png("ressources/IHDR/2^31x1080.png", &image));
+}
+
+Test(IHDR, height_too_high)
+{
+	t_image	image;
+
+	cr_assert(!decode_png("ressources/IHDR/1920x2^31.png", &image));
+}
+
+Test(IHDR, valid_dimensions)
+{
+	t_image	image;
+
+	cr_assert(decode_png("ressources/IHDR/valid.png", &image));
 	cr_assert(image.width == 1920);
 	cr_assert(image.height == 1080);
-}
-
-Test(decoder, invalid_end_chunk)
-{
-	t_image	image;
-
-	cr_assert(!decode_png("ressources/invalid_end_chunk.png", &image));
-}
-
-Test(decoder, valid_end_chunk)
-{
-	t_image	image;
-
-	cr_assert(decode_png("ressources/panoramic.png", &image));
 }
