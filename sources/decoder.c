@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:04:30 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/15 01:20:03 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/15 04:10:42 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,25 @@ bool	decode_u31(int fd, t_u32 *n)
 	if (bytes[0] > 0x7f)
 		return (false);
 	*n = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+	return (true);
+}
+
+// Skips bytes present in unknown chunks or currently unused information.
+// Optimally, for unknown chunks, we should check wether they are critical,
+// and check their CRC too.
+
+bool	skip_bytes(int fd, t_u32 nb_bytes)
+{
+	t_u8	buf[1024];
+
+	while (nb_bytes > 1024)
+	{
+		if (read(fd, buf, 1024) != 1024)
+			return (false);
+		nb_bytes -= 1024;
+	}
+	if (read(fd, buf, nb_bytes) != nb_bytes)
+		return (false);
 	return (true);
 }
 
@@ -82,26 +101,7 @@ bool	decode_ihdr_header(int fd, t_u32 *width, t_u32 *height)
 		return (false);
 	if (!decode_u31(fd, height) || !*height)
 		return (false);
-	if (read(fd, (t_u8 [9]){0}, 9) != 9)
-		return (false);
-	return (true);
-}
-
-// Skips bytes present in unknown chunks.
-// Optimally, we should check wether those chunks are critical,
-// and check their CRC too.
-
-bool	skip_bytes(int fd, t_u32 nb_bytes)
-{
-	t_u8	buf[1024];
-
-	while (nb_bytes > 1024)
-	{
-		if (read(fd, buf, 1024) != 1024)
-			return (false);
-		nb_bytes -= 1024;
-	}
-	if (read(fd, buf, nb_bytes) != nb_bytes)
+	if (!skip_bytes(fd, 9))
 		return (false);
 	return (true);
 }
@@ -120,7 +120,7 @@ bool	decode_png_stream(int fd, t_image *image)
 		if (!decode_chunk_header(fd, &chunk_len, chunk_type))
 			return (false);
 		if (ft_mem_equal(chunk_type, "IEND", 4))
-			break ;
+			return (chunk_len == 0 && skip_bytes(fd, 4));
 		if (!skip_bytes(fd, chunk_len + 4))
 			return (false);
 	}
