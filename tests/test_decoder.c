@@ -6,7 +6,7 @@
 /*   By: vchakhno <vchakhno@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/01 01:05:15 by vchakhno          #+#    #+#             */
-/*   Updated: 2024/03/01 03:44:02 by vchakhno         ###   ########.fr       */
+/*   Updated: 2024/03/01 03:57:49 by vchakhno         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,4 +48,18 @@ Test(decoder, valid_dimensions)
 	cr_assert(decode_png("ressources/panoramic.png", &image));
 	cr_assert(image.width == 1920);
 	cr_assert(image.height == 1080);
+}
+
+Test(decoder, invalid_end_chunk)
+{
+	t_image	image;
+
+	cr_assert(!decode_png("ressources/invalid_end_chunk.png", &image));
+}
+
+Test(decoder, valid_end_chunk)
+{
+	t_image	image;
+
+	cr_assert(decode_png("ressources/panoramic.png", &image));
 }
